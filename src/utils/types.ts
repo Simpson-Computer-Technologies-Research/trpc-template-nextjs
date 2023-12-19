@@ -6,3 +6,10 @@ export interface Response {
   timestamp: number;
   id: number;
 }
+
+export enum Status {
+  IDLE,
+  LOADING,
+  SUCCESS,
+  ERROR,
+}

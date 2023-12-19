@@ -1,29 +1,27 @@
-import Head from "next/head";
-
 import { api } from "@/utils/api";
 import { PREVENT_TRPC_FETCH } from "@/utils/constants";
 import { useState } from "react";
-import { type Response } from "@/utils/types";
+import { Status, type Response } from "@/utils/types";
 import { LoadingRelative } from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import MainWrapper from "@/components/MainWrapper";
+import Button from "@/components/Button";
+import PageHead from "@/components/PageHead";
 
-enum Status {
-  IDLE,
-  LOADING,
-  SUCCESS,
-  ERROR,
-}
-
+// Homepage component
 export default function Home() {
   const [status, setStatus] = useState<Status>(Status.IDLE);
   const [text, setText] = useState<string>("");
   const [data, setData] = useState<Response>();
 
-  // tRPC Query
+  // tRPC Query (fetching data)
   const { refetch } = api.test.get.useQuery({ text }, PREVENT_TRPC_FETCH);
 
+  // tRPC Mutation (updating data)
+  const { mutate } = api.test.put.useMutation();
+
   // Refetch the query
-  async function onClick() {
+  async function onFetch() {
     const res = await refetch();
 
     setStatus(res.error ? Status.ERROR : Status.SUCCESS);
@@ -32,13 +30,12 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>tRPC Template</title>
-        <meta name="description" content="tRPC Template for Next.js" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <PageHead
+        title="tRPC Next.js Example"
+        description="tRPC Next.js Example"
+      />
 
-      <main className="flex min-h-screen flex-col items-center justify-center text-black">
+      <MainWrapper>
         <input
           className="border border-black px-4 py-3"
           placeholder="Enter text"
@@ -46,25 +43,22 @@ export default function Home() {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <button
-          className="m-2 border border-black px-4 py-3 duration-300 ease-in-out hover:bg-black hover:text-white"
-          onClick={async () => await onClick()}
-        >
-          Fetch data
-        </button>
+
+        <Button onClick={async () => await onFetch()}>Fetch data</Button>
+        <Button onClick={async () => mutate({ text })}>Update data</Button>
 
         {status === Status.LOADING && <LoadingRelative />}
-
-        {status === Status.SUCCESS && (
-          <p className="mt-3">
-            <strong>Response data:</strong> {data?.result}
-          </p>
-        )}
-
-        {status === Status.ERROR && (
-          <ErrorMessage>An error has occurred.</ErrorMessage>
-        )}
-      </main>
+        {status === Status.SUCCESS && <ResponseData data={data!} />}
+        {status === Status.ERROR && <ErrorMessage>Error!</ErrorMessage>}
+      </MainWrapper>
     </>
+  );
+}
+
+function ResponseData({ data }: { data: Response }) {
+  return (
+    <p className="mt-3">
+      <strong>Response data:</strong> {data.result}
+    </p>
   );
 }

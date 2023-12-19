@@ -1,5 +1,5 @@
 interface Input {
-  name: string;
+  text: string;
 }
 
 export function PUT(input: Input) {
@@ -10,7 +10,7 @@ export function PUT(input: Input) {
   const id = Math.floor(Math.random() * 1000);
 
   return {
-    result: input.name,
+    result: input.text,
     success: true,
     message: "Request successful",
     status: 200,

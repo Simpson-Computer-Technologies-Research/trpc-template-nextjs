@@ -11,6 +11,6 @@ export const testRouter = createTRPCRouter({
     .query(({ input }) => GET(input)),
 
   put: publicProcedure
-    .input(z.object({ name: zstring() }))
+    .input(z.object({ text: zstring() }))
     .mutation(async ({ input }) => PUT(input)),
 });
