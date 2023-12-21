@@ -12,7 +12,7 @@ import PageHead from "@/components/PageHead";
 export default function Home() {
   const [status, setStatus] = useState<Status>(Status.IDLE);
   const [text, setText] = useState<string>("");
-  const [data, setData] = useState<Response>();
+  const [data, setData] = useState<Response | undefined>();
 
   // tRPC Query (fetching data)
   const { refetch } = api.test.get.useQuery({ text }, PREVENT_TRPC_FETCH);
