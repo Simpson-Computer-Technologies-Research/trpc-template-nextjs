@@ -3,7 +3,7 @@ export interface Response {
   success: boolean;
   message: string;
   timestamp: number;
-  id: number;
+  id: string;
 }
 
 export enum Status {
