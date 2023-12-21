@@ -1,5 +1,5 @@
 import { api } from "@/utils/api";
-import { PREVENT_TRPC_FETCH } from "@/utils/constants";
+import { PREVENT_TRPC_FETCH } from "@/utils/trpc";
 import { useState } from "react";
 import { Status, type Response } from "@/lib/types";
 import { LoadingRelative } from "@/components/Loading";
