@@ -1,31 +1,48 @@
-import { api } from "@/utils/api";
-import { PREVENT_TRPC_FETCH } from "@/utils/trpc";
+import { api } from "@/lib/utils/api";
 import { useState } from "react";
-import { Status, type Response } from "@/lib/types";
-import { LoadingRelative } from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
 import MainWrapper from "@/components/MainWrapper";
-import Button from "@/components/Button";
 import PageHead from "@/components/PageHead";
+import Button from "@/components/buttons/Button";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
-// Homepage component
-export default function Home() {
+/**
+ * Status enum
+ */
+enum Status {
+  IDLE,
+  LOADING,
+  SUCCESS,
+  ERROR,
+}
+
+/**
+ * Home page
+ *
+ * @returns JSX.Element
+ */
+export default function Home(): JSX.Element {
   const [status, setStatus] = useState<Status>(Status.IDLE);
   const [text, setText] = useState<string>("");
-  const [data, setData] = useState<Response | undefined>();
+  const [data, setData] = useState<{ result: string }>();
 
-  // tRPC Query (fetching data)
-  const { refetch } = api.test.get.useQuery({ text }, PREVENT_TRPC_FETCH);
+  // tRPC Mutation
+  const { mutateAsync: fetchData } = api.test.testMutate.useMutation();
 
-  // tRPC Mutation (updating data)
-  const { mutate } = api.test.put.useMutation();
+  /**
+   * Fetch data
+   *
+   * @returns Promise<void>
+   */
+  async function onClick(): Promise<void> {
+    setStatus(Status.LOADING);
 
-  // Refetch the query
-  async function onFetch() {
-    const res = await refetch();
+    const res = await fetchData({
+      text,
+    });
 
-    setStatus(res.error ? Status.ERROR : Status.SUCCESS);
-    setData(res.data);
+    setStatus(Status.SUCCESS);
+    setData(res);
   }
 
   return (
@@ -35,30 +52,30 @@ export default function Home() {
         description="tRPC Next.js Example"
       />
 
-      <MainWrapper>
+      <MainWrapper className="gap-4">
+        <div className="flex flex-col gap-1 text-center">
+          <h1 className="text-3xl font-bold">tRPC Template</h1>
+          <p className="text-lg">
+            This is a template for building fullstack TypeScript applications
+            with tRPC.
+          </p>
+        </div>
+
         <input
-          className="border border-black px-4 py-3"
+          className="w-full rounded-lg border-2 p-3"
           placeholder="Enter text"
-          type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
-        <Button onClick={async () => await onFetch()}>Fetch data</Button>
-        <Button onClick={async () => mutate({ text })}>Update data</Button>
+        <Button className="w-full" onClick={onClick}>
+          Fetch Data
+        </Button>
 
-        {status === Status.LOADING && <LoadingRelative />}
-        {status === Status.SUCCESS && <ResponseData data={data!} />}
+        {status === Status.LOADING && <LoadingSpinner className="h-7 w-7" />}
+        {status === Status.SUCCESS && <p>{data?.result}</p>}
         {status === Status.ERROR && <ErrorMessage>Error!</ErrorMessage>}
       </MainWrapper>
     </>
-  );
-}
-
-function ResponseData({ data }: { data: Response }) {
-  return (
-    <p className="mt-3">
-      <strong>Response data:</strong> {data.result}
-    </p>
   );
 }
